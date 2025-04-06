@@ -3,4 +3,5 @@ if not package.loaded["mini.doc"] then
 end
 require("mini.doc").generate({
     "ff-example-01.lua",
+    "ff-example-02.lua",
 })
