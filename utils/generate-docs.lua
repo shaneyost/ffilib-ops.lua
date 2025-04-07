@@ -4,4 +4,5 @@ end
 require("mini.doc").generate({
     "ff-example-01.lua",
     "ff-example-02.lua",
+    "ff-example-03.lua",
 })
