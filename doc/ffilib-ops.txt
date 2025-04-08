@@ -119,4 +119,22 @@ on yet. Some initial questions to start thinking about for next week.
   union or similiar concept? See if you can use metatable to set this up.
 
 
+==============================================================================
+------------------------------------------------------------------------------
+If I call `type(ffi.typeof(type)` this tells me very little. It just tells
+me `cdata`. This is actually a cdata constructor object which is callable.
+
+If I wanted to know that (a) is of type (Point) I could call something
+like the following. This is about it from what I can gather.
+
+Usage ~
+Lua >
+    print(ffi.istype(Point, a))
+<
+
+It's important to know that (a) is a cdata struct, and LuaJIT stores it in
+FFI-managed memory by value. So (a) contains the full struct itself. This
+is all out of the FFI documentation.
+
+
  vim:tw=78:ts=8:noet:ft=help:norl:
