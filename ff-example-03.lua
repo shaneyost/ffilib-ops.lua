@@ -35,8 +35,8 @@ typedef struct {
 } __attribute__((__packed__)) Point_t;
 ]]
 
-local Point = FF03.new(def, 'Point_t')
-local a = Point({x=1, y=2})
+local Point = FF03.new(def, "Point_t")
+local a = Point({ x = 1, y = 2 })
 
 local file = assert(io.open("table.bin", "wb"))
 file:write(ffi.string(ffi.cast("const char *", a), ffi.sizeof(a)))

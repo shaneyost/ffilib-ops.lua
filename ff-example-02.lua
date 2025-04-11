@@ -38,22 +38,22 @@ local FF_EXAMPLE_02 = {}
 ---
 ---     > When I call `ffi.cdef`, LuaJIT parses the C declaration I provided.
 ---       It adds them to a internal C type registry. LuaJIT then allows me to
----       use those types for allocating memory `ffi.new`, casting pointers 
+---       use those types for allocating memory `ffi.new`, casting pointers
 ---       `ffi.cast` and calling external C functions via a library `ffi.load`
 ---     >
----     > It does not generate any actual code though or memory. It only is 
----       declaring types, function signatures and external symbols. I can 
+---     > It does not generate any actual code though or memory. It only is
+---       declaring types, function signatures and external symbols. I can
 ---       think of it like providing LuaJIT a little .h file saying "Yo,
 ---       here's the stuff I want to work, please recognize it."
 ---
---- Ok, not too bad. So if we can register C declarations now why use the 
+--- Ok, not too bad. So if we can register C declarations now why use the
 --- method `ffi.typeof(type)`. Didn't I just tell LuaJIT to recognize that
 --- type?
 ---
 ---     > `ffi.cdef` registers a type globally so LuaJIT knows what it is. Now
----       `ffi.typeof() creates a handle to that type that I can use 
----       efficiently in Lua. 
---- 
+---       `ffi.typeof() creates a handle to that type that I can use
+---       efficiently in Lua.
+---
 --- Cool, so it gives me a Lua object I can treat like a constructor then. But
 --- hold up, what does `ffi.new` do? Am I not suppose to use it too? What am I
 --- missing?
@@ -101,6 +101,6 @@ typedef struct {
 } Point_t;
 ]]
 
-local Point = FF_EXAMPLE_02.new(def, 'Point_t')
-local a = Point({x=1, y=2})
+local Point = FF_EXAMPLE_02.new(def, "Point_t")
+local a = Point({ x = 1, y = 2 })
 print(string.format("(%d, %d)", a.x, a.y))

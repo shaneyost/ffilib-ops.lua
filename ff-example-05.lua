@@ -4,7 +4,7 @@ local FF05 = {}
 
 --- I know the answer to this question but I want to write it out. The
 --- question is why would I pack C structures in my table tool. What issues
---- does packed 1-byte alignment fix? 
+--- does packed 1-byte alignment fix?
 ---
 --- If we don’t explicitly pack our C structures to 1-byte alignment, the
 --- compiler or in our case, LuaJIT’s FFI subsystem may insert padding
@@ -40,7 +40,7 @@ function FF05.dsp(cdata)
     local ptr = ffi.cast("const uint8_t *", cdata)
     local size = ffi.sizeof(cdata)
     print(string.format("Size: %d (Bytes)", size))
-    for i=0, size-1 do
+    for i = 0, size - 1 do
         io.stdout:write(string.format("%02X ", ptr[i]))
     end
     io.stdout:write("\n")
@@ -53,8 +53,8 @@ typedef struct
     uint16_t y;
 } Foo_t;
 ]]
-local Foo_t = FF05.new(foo_cdef, 'Foo_t')
-local a = Foo_t({x=0x11, y=0xDEAD})
+local Foo_t = FF05.new(foo_cdef, "Foo_t")
+local a = Foo_t({ x = 0x11, y = 0xDEAD })
 FF05.dsp(a)
 
 local foo_packed_cdef = [[
@@ -64,8 +64,6 @@ typedef struct
     uint16_t y;
 } __attribute__((__packed__)) FooPacked_t;
 ]]
-local FooPacked_t = FF05.new(foo_packed_cdef, 'FooPacked_t')
-local b = FooPacked_t({x=0xFF, y=0xDEAD})
+local FooPacked_t = FF05.new(foo_packed_cdef, "FooPacked_t")
+local b = FooPacked_t({ x = 0xFF, y = 0xDEAD })
 FF05.dsp(b)
-
-

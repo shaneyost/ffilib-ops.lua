@@ -37,21 +37,21 @@ Usage ~
 
     > When I call `ffi.cdef`, LuaJIT parses the C declaration I provided.
       It adds them to a internal C type registry. LuaJIT then allows me to
-      use those types for allocating memory `ffi.new`, casting pointers 
+      use those types for allocating memory `ffi.new`, casting pointers
       `ffi.cast` and calling external C functions via a library `ffi.load`
     >
-    > It does not generate any actual code though or memory. It only is 
-      declaring types, function signatures and external symbols. I can 
+    > It does not generate any actual code though or memory. It only is
+      declaring types, function signatures and external symbols. I can
       think of it like providing LuaJIT a little .h file saying "Yo,
       here's the stuff I want to work, please recognize it."
 
-Ok, not too bad. So if we can register C declarations now why use the 
+Ok, not too bad. So if we can register C declarations now why use the
 method `ffi.typeof(type)`. Didn't I just tell LuaJIT to recognize that
 type?
 
     > `ffi.cdef` registers a type globally so LuaJIT knows what it is. Now
-      `ffi.typeof() creates a handle to that type that I can use 
-      efficiently in Lua. 
+      `ffi.typeof() creates a handle to that type that I can use
+      efficiently in Lua.
 
 Cool, so it gives me a Lua object I can treat like a constructor then. But
 hold up, what does `ffi.new` do? Am I not suppose to use it too? What am I
@@ -105,11 +105,6 @@ on yet. Some initial questions to start thinking about for next week.
   alignment. To solidfy our reasoning go over this again (i.e write it out
   on why it's important for cross platform compatibility).
 
-- Why would would place `__attribute__((__packed__))` at the end vs at the
-  beginning (i.e. after `typdef struct`)? Whats the significance here and
-  can we write out an example showing casing why. This will help us
-  remember why.
-
 - Write a small response describing why we're using attributes here vs the
   preprocessor statement `#pragma pack`. Refer to the warning statement in
   the ffi documentation and quote that here so we remember "the why".
@@ -121,6 +116,8 @@ on yet. Some initial questions to start thinking about for next week.
 
 ==============================================================================
 ------------------------------------------------------------------------------
+                                                                    *FF04.new()*
+                           `FF04.new`({def}, {type})
 If I call `type(ffi.typeof(type)` this tells me very little. It just tells
 me `cdata`. This is actually a cdata constructor object which is callable.
 
@@ -135,6 +132,16 @@ Lua >
 It's important to know that (a) is a cdata struct, and LuaJIT stores it in
 FFI-managed memory by value. So (a) contains the full struct itself. This
 is all out of the FFI documentation.
+
+One little side note. If happened to type ffi.typeof(a) then it will
+return its concrete FFI type being a cdata object. However, if I register
+a type with ffi.cdef it call it on that ffi.typeof('Point_t') then it will
+return a type constructor. So if I called ffi.typeof(Point) it would give
+me a concrete FFI type not a type constructor.
+
+------------------------------------------------------------------------------
+This is an example where it would not give me a type constructor and just
+give me the FFI concrete type.
 
 
  vim:tw=78:ts=8:noet:ft=help:norl:
