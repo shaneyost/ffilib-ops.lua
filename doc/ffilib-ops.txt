@@ -144,4 +144,106 @@ This is an example where it would not give me a type constructor and just
 give me the FFI concrete type.
 
 
+==============================================================================
+------------------------------------------------------------------------------
+I know the answer to this question but I want to write it out. The
+question is why would I pack C structures in my table tool. What issues
+does packed 1-byte alignment fix?
+
+If we don’t explicitly pack our C structures to 1-byte alignment, the
+compiler or in our case, LuaJIT’s FFI subsystem may insert padding
+between structure members to satisfy platform-specific alignment rules.
+These rules align fields to their natural boundaries (e.g., `uint16_t` on
+2-byte boundaries, `uint32_t` on 4-byte boundaries), which helps optimize
+memory access but alters the raw memory layout.
+
+This implicit padding creates gaps between fields that can lead to binary
+incompatibility when the structure is serialized (e.g., written to a file
+or transmitted) and later interpreted by a C program expecting a
+different layout. As a result, the binary layout may no longer perfectly
+superimpose a corresponding C structure in a compiled target application,
+causing ABI (Application Binary Interface) conflicts.
+
+To avoid this, we pack our structures to 1-byte alignment, which
+guarantees a deterministic, tightly packed memory layout with no padding.
+This ensures that the generated binary representation is consistent and
+interpretable by C code, regardless of how it was generated.
+
+It’s important that our table tool can run on any host architecture (x86,
+ARM, little-endian, big-endian) and still produce reliable, deterministic
+output that is compatible with the target architecture's expectations.
+Packing the structure removes alignment dependencies from the host system
+making the tool's output portable and ABI-safe.
+
+
+==============================================================================
+------------------------------------------------------------------------------
+                                                                    *FF06.new()*
+                           `FF06.new`({cdef}, {type})
+Say I wanted to simplify io such as create table files, logging or just
+simple hex dumps. What makes sense and what doesn't? How could I leverage
+metatables to implement my idea?
+
+We will want the ability to add behavior to our cdata type constructor for
+methods and behaviors. Because we're using FFI library we use the method
+called `ffi.metatype` here NOT `setmetatable`.
+
+Right away I know that I will represent the metamethod __index as a table.
+I would like to wrap ffi methods a bit but only what makes sense. So a
+method like `size` would be nice. Another method for returning a lua
+immutable string (raw byte array really) would also be nice for file i/o.
+
+Ok so that takes care of alot but what about logging/dumping the raw data?
+I think __tostring metamethod makes the most sense here. Later I might
+choose too implement a separate dumping function for just dumpting the raw
+data and make __tostring the more elaborate dump with custom string
+formatting.
+
+Usage ~
+Lua >
+    -- Easy file i/o
+    file:write(p:to_byte_string())
+    -- Printable/Resuable
+    print(p)
+    print(p:size())
+<
+
+>lua
+  function FF06.new(cdef, type)
+      ffi.cdef(cdef)
+      return ffi.metatype(ffi.typeof(type), {
+          __index = {
+              to_byte_string = function(self)
+                  return ffi.string(self.raw, self:size())
+              end,
+              size = function(self)
+                  return ffi.sizeof(self)
+              end,
+          },
+          __tostring = function(self)
+              local out = {}
+              for i = 0, self:size() - 1 do
+                  local fmt = string.format("%02X", self.raw[i])
+                  table.insert(out, fmt)
+              end
+              return table.concat(out, " ")
+          end,
+      })
+  end
+
+  local cdef = [[
+  typedef union
+  {
+      struct
+      {
+          uint8_t x;
+          uint8_t y;
+      };
+      uint8_t raw[2];
+  } __attribute__((__packed__)) Point_u;
+  ]]
+<
+------------------------------------------------------------------------------
+
+
  vim:tw=78:ts=8:noet:ft=help:norl:
