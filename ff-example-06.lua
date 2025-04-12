@@ -34,7 +34,7 @@ function FF06.new(cdef, type)
     ffi.cdef(cdef)
     return ffi.metatype(ffi.typeof(type), {
         __index = {
-            to_byte_string = function(self)
+            to_bytes = function(self)
                 return ffi.string(self.raw, self:size())
             end,
             size = function(self)
@@ -57,19 +57,25 @@ typedef union
 {
     struct
     {
-        uint8_t x;
-        uint8_t y;
+        uint32_t x;
+        uint32_t y;
+        uint8_t  c;
     };
     uint8_t raw[2];
-} __attribute__((__packed__)) Point_u;
+} __attribute__((__packed__)) Model_u;
 ]]
 ---minidoc_afterlines_end
 
-local Point = FF06.new(cdef, "Point_u")
-local p = Point({ x = 1 })
-print(p)
-print(p:size())
+local Model = FF06.new(cdef, "Model_u")
+local m1 = Model({c=1})
+local m2 = Model({c=3})
 
-local file = assert(io.open("table.bin", "wb"))
-file:write(p:to_byte_string())
+print(m1)
+print(m2)
+
+print(m1:size())
+print(m2:size())
+
+local file = assert(io.open("m1.bin", "wb"))
+file:write(m1:to_bytes())
 file:close()
