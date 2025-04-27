@@ -4,6 +4,9 @@ local FF07 = {}
 
 function FF07.new(cdef, type)
     ffi.cdef(cdef)
+    print("type: ", type)
+    print("size: ", ffi.sizeof(type))
+    print("cdef: ", cdef)
     return ffi.metatype(ffi.typeof(type), {
         __index = {
             size = function (self) return ffi.sizeof(self) end
